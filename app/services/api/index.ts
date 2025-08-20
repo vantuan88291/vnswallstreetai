@@ -5,7 +5,7 @@
  * See the [Backend API Integration](https://docs.infinite.red/ignite-cli/boilerplate/app/services/#backend-api-integration)
  * documentation for more details.
  */
-import { ApisauceInstance, create } from "apisauce"
+import { ApiResponse, ApisauceInstance, create } from "apisauce";
 
 import Config from "@/config"
 
@@ -39,6 +39,13 @@ export class Api {
         Accept: "application/json",
       },
     })
+  }
+
+  async getNews(limit: string): Promise<any> {
+    const response: ApiResponse<any> = await this.apisauce.get(
+      `https://www.vnwallstreet.top/api/inter/newsFlash/page?limit=${limit}&start=0&uid=-1`,
+    )
+    return response
   }
 }
 

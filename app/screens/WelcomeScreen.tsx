@@ -1,43 +1,53 @@
 import { FC } from "react"
-import { Image, ImageStyle, TextStyle, View, ViewStyle } from "react-native"
+import { ScrollView, TextStyle, View, ViewStyle, ActivityIndicator } from "react-native"
 
+import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
-import { isRTL } from "@/i18n"
+import { TextField } from "@/components/TextField"
+import { useData } from "@/screens/use-data"
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
 import type { ThemedStyle } from "@/theme/types"
-import { useSafeAreaInsetsStyle } from "@/utils/useSafeAreaInsetsStyle"
-
-const welcomeLogo = require("@assets/images/logo.png")
-const welcomeFace = require("@assets/images/welcome-face.png")
 
 export const WelcomeScreen: FC = function WelcomeScreen() {
-  const { themed, theme } = useAppTheme()
-
-  const $bottomContainerInsets = useSafeAreaInsetsStyle(["bottom"])
+  const { themed } = useAppTheme()
+  const { limit, setLimit, getData, loading, news, onStartShare } = useData()
 
   return (
-    <Screen preset="fixed" contentContainerStyle={$styles.flex1}>
+    <Screen safeAreaEdges={["top", "bottom"]} preset="fixed" contentContainerStyle={$styles.flex1}>
       <View style={themed($topContainer)}>
-        <Image style={themed($welcomeLogo)} source={welcomeLogo} resizeMode="contain" />
         <Text
           testID="welcome-heading"
           style={themed($welcomeHeading)}
-          tx="welcomeScreen:readyForLaunch"
+          text={"Get news"}
           preset="heading"
         />
-        <Text tx="welcomeScreen:exciting" preset="subheading" />
-        <Image
-          style={$welcomeFace}
-          source={welcomeFace}
-          resizeMode="contain"
-          tintColor={theme.colors.palette.neutral900}
+        <TextField
+          keyboardType={"numeric"}
+          placeholder={"Limit number"}
+          value={limit}
+          onChangeText={setLimit}
+          containerStyle={themed($welcomeHeading)}
+          label={"Limit of news"}
         />
+        <ScrollView>
+          <Text style={themed($welcomeHeading)} selectable text={news} />
+        </ScrollView>
       </View>
 
-      <View style={themed([$bottomContainer, $bottomContainerInsets])}>
-        <Text tx="welcomeScreen:postscript" size="md" />
+      <View style={themed($bottomContainer)}>
+        <Button disabled={loading} onPress={getData} text={loading ? undefined : "Start"}>
+          <ActivityIndicator size={"small"} />
+        </Button>
+        <View style={themed($row)}>
+          <Button
+            style={$styles.flex1}
+            onPress={onStartShare}
+            preset={"reversed"}
+            text={"Share result"}
+          />
+        </View>
       </View>
     </Screen>
   )
@@ -46,36 +56,21 @@ export const WelcomeScreen: FC = function WelcomeScreen() {
 const $topContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexShrink: 1,
   flexGrow: 1,
-  flexBasis: "57%",
-  justifyContent: "center",
   paddingHorizontal: spacing.lg,
+})
+const $row: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.xs,
 })
 
 const $bottomContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flexShrink: 1,
-  flexGrow: 0,
-  flexBasis: "43%",
-  backgroundColor: colors.palette.neutral100,
   borderTopLeftRadius: 16,
   borderTopRightRadius: 16,
   paddingHorizontal: spacing.lg,
   justifyContent: "space-around",
+  gap: spacing.xs,
 })
-
-const $welcomeLogo: ThemedStyle<ImageStyle> = ({ spacing }) => ({
-  height: 88,
-  width: "100%",
-  marginBottom: spacing.xxl,
-})
-
-const $welcomeFace: ImageStyle = {
-  height: 169,
-  width: 269,
-  position: "absolute",
-  bottom: -47,
-  right: -80,
-  transform: [{ scaleX: isRTL ? -1 : 1 }],
-}
 
 const $welcomeHeading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
