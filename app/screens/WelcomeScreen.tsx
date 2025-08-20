@@ -42,6 +42,8 @@ export const WelcomeScreen: FC = function WelcomeScreen() {
         </Button>
         <View style={themed($row)}>
           <Button
+            disabled={!news}
+            disabledStyle={$disableStyle}
             style={$styles.flex1}
             onPress={onStartShare}
             preset={"reversed"}
@@ -71,6 +73,10 @@ const $bottomContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   justifyContent: "space-around",
   gap: spacing.xs,
 })
+
+const $disableStyle: ViewStyle = {
+  opacity: 0.5,
+}
 
 const $welcomeHeading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,

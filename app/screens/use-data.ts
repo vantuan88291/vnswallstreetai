@@ -29,11 +29,20 @@ export const useData = () => {
     try {
       const fileUri = FileSystem.cacheDirectory + "news.txt"
       fileCache.current = fileUri
-      await FileSystem.writeAsStringAsync(fileUri, news, {
+      const content = `Bạn là chuyên gia phân tích thị trường crypto.\n
+Dưới đây là danh sách tin tức trong vài giờ qua, mỗi tin có thời gian cụ thể: \n 
+
+${news}
+
+Nhiệm vụ của bạn:  
+1. Tóm tắt các tin tức quan trọng theo trình tự thời gian.  
+2. Đánh giá tin nào có ảnh hưởng mạnh/yếu đến thị trường crypto (BTC, ETH, Altcoin).  
+3. Dự đoán xu hướng thị trường crypto trong 24h tới (Tăng / Giảm / Sideways) kèm lý do.  
+4. Nếu có thể, hãy chỉ ra tin tức nào mang tính dài hạn và tin nào chỉ mang tính ngắn hạn.`
+      await FileSystem.writeAsStringAsync(fileUri, content, {
         encoding: FileSystem.EncodingType.UTF8,
       })
 
-      // Kiểm tra có hỗ trợ share không
       const canShare = await Sharing.isAvailableAsync()
       if (!canShare) {
         Alert.alert("Thiết bị không hỗ trợ chia sẻ file")
@@ -42,7 +51,7 @@ export const useData = () => {
 
       await Sharing.shareAsync(fileUri, {
         mimeType: "text/plain",
-        dialogTitle: "Chia sẻ tin tức",
+        dialogTitle: "Chia sẻ",
       })
     } catch (e: any) {
       Alert.alert(e.toString())
