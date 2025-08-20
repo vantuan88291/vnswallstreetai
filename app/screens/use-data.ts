@@ -1,16 +1,14 @@
-import { useRef, useState } from "react";
+import { useState } from "react"
 import { Alert } from "react-native"
-import * as FileSystem from "expo-file-system"
-import * as Sharing from "expo-sharing"
 import { format } from "date-fns"
+import Share from "react-native-share"
 
 import { api } from "@/services/api"
 
 export const useData = () => {
-  const [limit, setLimit] = useState("300")
+  const [limit, setLimit] = useState("50")
   const [loading, setLoading] = useState(false)
   const [news, setNews] = useState<string>("")
-  const fileCache = useRef<string>(null)
 
   const getData = async () => {
     setLoading(true)
@@ -27,8 +25,6 @@ export const useData = () => {
   }
   const onStartShare = async () => {
     try {
-      const fileUri = FileSystem.cacheDirectory + "news.txt"
-      fileCache.current = fileUri
       const content = `Bạn là chuyên gia phân tích thị trường crypto.\n
 Dưới đây là danh sách tin tức trong vài giờ qua, mỗi tin có thời gian cụ thể: \n 
 
@@ -39,25 +35,13 @@ Nhiệm vụ của bạn:
 2. Đánh giá tin nào có ảnh hưởng mạnh/yếu đến thị trường crypto (BTC, ETH, Altcoin).  
 3. Dự đoán xu hướng thị trường crypto trong 24h tới (Tăng / Giảm / Sideways) kèm lý do.  
 4. Nếu có thể, hãy chỉ ra tin tức nào mang tính dài hạn và tin nào chỉ mang tính ngắn hạn.`
-      await FileSystem.writeAsStringAsync(fileUri, content, {
-        encoding: FileSystem.EncodingType.UTF8,
-      })
-
-      const canShare = await Sharing.isAvailableAsync()
-      if (!canShare) {
-        Alert.alert("Thiết bị không hỗ trợ chia sẻ file")
-        return
-      }
-
-      await Sharing.shareAsync(fileUri, {
-        mimeType: "text/plain",
-        dialogTitle: "Chia sẻ",
+      await Share.open({
+        message: content,
       })
     } catch (e: any) {
       Alert.alert(e.toString())
     } finally {
       // @ts-ignore
-      FileSystem.deleteAsync(fileCache.current, { idempotent: true });
     }
   }
   return {
