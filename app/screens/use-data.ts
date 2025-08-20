@@ -1,15 +1,24 @@
-import { useState } from "react"
+import { useEffect, useState } from "react";
 import { Alert } from "react-native"
 import { format } from "date-fns"
 import Share from "react-native-share"
 
 import { api } from "@/services/api"
+import { loadString, saveString } from "@/utils/storage";
 
 export const useData = () => {
-  const [limit, setLimit] = useState("50")
+  const [limit, setLimit] = useState("")
   const [loading, setLoading] = useState(false)
   const [news, setNews] = useState<string>("")
 
+  useEffect(() => {
+    setLimit(loadString("limit") || "50")
+    setNews(loadString("news") || "")
+  }, [])
+  const onChangeLimit = (text: string) => {
+    setLimit(text)
+    saveString("limit", text)
+  }
   const getData = async () => {
     setLoading(true)
     const data = await api.getNews(limit)
@@ -21,20 +30,18 @@ export const useData = () => {
       )
       .join("\n\n")
     setNews(dataNews)
+    saveString("news", dataNews)
     setLoading(false)
   }
   const onStartShare = async () => {
     try {
       const content = `Bạn là chuyên gia phân tích thị trường crypto.\n
-Dưới đây là danh sách tin tức trong vài giờ qua, mỗi tin có thời gian cụ thể: \n 
-
-${news}
-
 Nhiệm vụ của bạn:  
-1. Tóm tắt các tin tức quan trọng theo trình tự thời gian.  
-2. Đánh giá tin nào có ảnh hưởng mạnh/yếu đến thị trường crypto (BTC, ETH, Altcoin).  
-3. Dự đoán xu hướng thị trường crypto trong 24h tới (Tăng / Giảm / Sideways) kèm lý do.  
-4. Nếu có thể, hãy chỉ ra tin tức nào mang tính dài hạn và tin nào chỉ mang tính ngắn hạn.`
+1. Đánh giá tin nào có ảnh hưởng mạnh đến thị trường crypto (BTC, ETH, Altcoin).  
+2. Dự đoán xu hướng thị trường crypto trong 24h tới (Tăng / Giảm / Sideways) kèm lý do.  
+3. Nếu có thể, hãy chỉ ra tin tức nào mang tính dài hạn và tin nào chỉ mang tính ngắn hạn.\`\n
+Dưới đây là danh sách tin tức trong vài giờ qua, mỗi tin có thời gian cụ thể ở bên cạnh, hãy dựa vào những tin tức đó để thực hiện nhiệm vụ của bạn:\n 
+${news}`
       await Share.open({
         message: content,
       })
@@ -46,7 +53,7 @@ Nhiệm vụ của bạn:
   }
   return {
     limit,
-    setLimit,
+    setLimit: onChangeLimit,
     getData,
     news,
     loading,
